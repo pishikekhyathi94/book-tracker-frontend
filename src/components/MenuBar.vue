@@ -1,5 +1,5 @@
 <script setup>
-import ocLogo from "/oc_logo.png";
+import logo from "/logo.jpg";
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import UserServices from "../services/UserServices";
@@ -7,11 +7,10 @@ import UserServices from "../services/UserServices";
 const router = useRouter();
 
 const user = ref(null);
-const title = ref("Recipes");
 const logoURL = ref("");
 
 onMounted(() => {
-  logoURL.value = ocLogo;
+  logoURL.value = logo;
   user.value = JSON.parse(localStorage.getItem("user"));
 });
 
@@ -29,29 +28,28 @@ function logout() {
 }
 </script>
 
+<style>
+.my-round-image img {
+  border-radius: 8px;
+}
+.header-btn .v-btn__content {
+  font-weight: 600;
+}
+</style>
+
 <template>
   <div>
     <v-app-bar color="primary" app dark>
-      <router-link :to="{ name: 'recipes' }">
+      <router-link :to="{ name: '' }">
         <v-img
-          class="mx-2"
+          class="mx-2 my-round-image"
           :src="logoURL"
           height="50"
-          width="50"
+          width="150"
           contain
         ></v-img>
       </router-link>
-      <v-toolbar-title class="title">
-        {{ title }}
-      </v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn class="mx-2" :to="{ name: 'recipes' }"> Recipes </v-btn>
-      <v-btn v-if="user === null" class="mx-2" :to="{ name: 'login' }">
-        Login
-      </v-btn>
-      <v-btn v-if="user !== null" class="mx-2" :to="{ name: 'ingredients' }">
-        Ingredients
-      </v-btn>
       <v-menu v-if="user !== null" min-width="200px" rounded>
         <template v-slot:activator="{ props }">
           <v-btn icon v-bind="props">
