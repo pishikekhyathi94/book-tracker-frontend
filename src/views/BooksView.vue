@@ -4,13 +4,18 @@ import DeleteConfirmationDialog from "../components/DeleteConfirmationDialog.vue
 import AuthorCard from "../components/AuthorCard.vue";
 import AddAuthorDialog from "../components/AddAuthorDialog.vue";
 import AuthorServices from "../services/AuthorServices.js";
+import GenresList from "../components/GenresList.vue";
+import AddGenreDialog from "../components/AddGenreDialog.vue";
+import GenreServices from "../services/GenreServices.js";
 
 const tab = ref(null);
 const loading = ref(false);
 const search = ref("");
 const user = ref(null);
 const showAuthorDialog = ref(false);
+const showGenreDialog = ref(false);
 const authorCardRef = ref(null);
+const genresListRef = ref(null);
 const snackbar = ref({
   value: false,
   color: "",
@@ -47,6 +52,27 @@ async function createAuthor(values) {
     });
 }
 
+async function createGenre(values) {
+  const payload = {
+    ...values,
+    userId: user.value.id,
+  };
+  await GenreServices.addGenre(payload)
+    .then((response) => {
+      if (genresListRef?.value && genresListRef?.value?.getGenres) {
+        genresListRef.value.getGenres();
+        showGenreDialog.value = false;
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = `${response?.data?.bookGenre} added successfully!`;
+      }
+    })
+    .catch((error) => {
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text = error?.response?.data?.message;
+    });
+}
 function closeSnackBar() {
   snackbar.value.value = false;
 }
@@ -75,6 +101,9 @@ function closeSnackBar() {
           color="secondary">
           Add Author
         </v-btn>
+        <v-btn variant="outlined" @click="showGenreDialog = true" v-if="tab === 5" class="my-2 header-btn" color="secondary">
+          Add Genre
+        </v-btn>
       </v-col>
     </v-row>
     <v-tabs-window v-model="tab">
@@ -96,8 +125,18 @@ function closeSnackBar() {
           </v-row>
         </v-container>
       </v-tabs-window-item>
+      <v-tabs-window-item :key="5" :value="5">
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <GenresList :tab="tab" ref="genresListRef" />
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-tabs-window-item>
     </v-tabs-window>
     <AddAuthorDialog v-model="showAuthorDialog" @submit="createAuthor" />
+    <AddGenreDialog v-model="showGenreDialog" @submit="createGenre" />
   </v-card>
   <v-snackbar v-model="snackbar.value" rounded="pill">
     {{ snackbar.text }}
