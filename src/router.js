@@ -1,30 +1,23 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Login from "./views/Login.vue";
+import BooksView from "./views/BooksView.vue";
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
+const routes = [
     {
-      path: "/",
-      name: "login",
-      component: () => import("./views/Login.vue"),
-    },
+        path: "/",
+        name: "login",
+        component: Login,
+      },
     {
-      path: "/recipes",
-      name: "recipes",
-      component: () => import("./views/RecipeList.vue"),
+        path: "/books",
+        name: "books",
+        component: BooksView,
     },
-    {
-      path: "/recipe/:id",
-      name: "editRecipe",
-      props: true,
-      component: () => import("./views/EditRecipe.vue"),
-    },
-    {
-      path: "/ingredients",
-      name: "ingredients",
-      component: () => import("./views/IngredientList.vue"),
-    },
-  ],
+];
+
+const router =  createRouter({
+    history: createWebHistory(),
+    routes,
 });
 
 export default router;
