@@ -1,0 +1,18 @@
+body {
+  font-family: "Quicksand", sans-serif;
+}
+#app {
+  width: 100%;
+  padding: 0 !important;
+}
+@media (min-width: 1024px) {
+  #app {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 960px) {
+  .v-container {
+    max-width: 100% !important;
+  }
+}

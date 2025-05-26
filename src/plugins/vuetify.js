@@ -1,15 +1,17 @@
 // Styles
 import "@mdi/font/css/materialdesignicons.css";
 import "vuetify/styles";
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
 // Vuetify
 import { createVuetify } from "vuetify";
 
-const OCTheme = {
+const BookTheme = {
   dark: false,
   colors: {
-    primary: "#80162B",
-    secondary: "#E1E1E1",
+    primary: "#21409a",
+    secondary: "#f37a21",
     accent: "#47121D",
     success: "#47121D",
     error: "#EE5044",
@@ -21,10 +23,12 @@ const OCTheme = {
 };
 
 export default createVuetify({
+  components,
+  directives,
   theme: {
-    defaultTheme: "OCTheme",
+    defaultTheme: "BookTheme",
     themes: {
-      OCTheme,
+      BookTheme,
     },
   },
 });
