@@ -21,6 +21,9 @@ const user = ref({
 
 onMounted(async () => {
   localStorage.removeItem("user");
+  if (localStorage.getItem("user") !== null) {
+    router.push({ name: "books" });
+  }
 });
 
 async function createAccount() {
@@ -30,6 +33,23 @@ async function createAccount() {
       snackbar.value.color = "green";
       snackbar.value.text = "Account created successfully!";
       router.push({ name: "login" });
+    })
+    .catch((error) => {
+      console.log(error);
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text = error.response.data.message;
+    });
+}
+
+async function login() {
+  await UserServices.loginUser(user)
+    .then((data) => {
+      window.localStorage.setItem("user", JSON.stringify(data.data));
+      snackbar.value.value = true;
+      snackbar.value.color = "green";
+      snackbar.value.text = "Login successful!";
+      router.push({ name: "books" });
     })
     .catch((error) => {
       console.log(error);
@@ -94,13 +114,13 @@ function closeSnackBar() {
             >
             <v-spacer></v-spacer>
 
-            <v-btn variant="flat" color="primary header-btn">Login</v-btn>
+            <v-btn variant="flat" color="primary header-btn" @click="login()">Login</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
 
-    <v-dialog persistent v-model="isCreateAccount" width="800">
+        <v-dialog persistent v-model="isCreateAccount" width="800">
       <v-card class="rounded-lg elevation-5">
         <v-card-title class="headline mb-2">Create Account </v-card-title>
         <v-card-text>
