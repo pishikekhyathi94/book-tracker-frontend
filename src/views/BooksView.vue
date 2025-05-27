@@ -32,24 +32,31 @@ onMounted(async () => {
   user.value = JSON.parse(localStorage.getItem("user"));
   if (user) {
     await fetchBooks();
-    try {
-      const authorRes = await AuthorServices.getAuthors(user.value.id);
-      authors.value = authorRes.data;
-    } catch (e) {
-      authors.value = [];
-    }
-    try {
-      const genreRes = await GenreServices.getGenres(user.value.id);
-      genres.value = genreRes.data;
-    } catch (e) {
-      genres.value = [];
-    }
+    await getAuthors();
+    await getGeners();
   }
 });
 
-watch(tab, () => {
+watch(tab, async () => {
   search.value = "";
 });
+
+async function getAuthors(){
+  try {
+        const authorRes = await AuthorServices.getAuthors(user.value.id);
+        authors.value = authorRes.data;
+      } catch (e) {
+        authors.value = [];
+      }
+}
+async function getGeners(){
+  try {
+        const genreRes = await GenreServices.getGenres(user.value.id);
+        genres.value = genreRes.data;
+      } catch (e) {
+        genres.value = [];
+      }
+}
 
 async function createAuthor(values) {
   const payload = {
@@ -142,13 +149,11 @@ async function createBook(bookValues) {
 </style>
 
 <template>
-  <v-card class="w-100">
+  <v-card class="w-100 h-100">
     <v-row>
       <v-col cols="10">
         <v-tabs v-model="tab" align-tabs="left" color="secondary" class="mb-4 px-6">
           <v-tab :value="1">Books List</v-tab>
-          <v-tab :value="2">Recommendations</v-tab>
-          <v-tab :value="3">Whislist</v-tab>
           <v-tab :value="4">Authors</v-tab>
           <v-tab :value="5">Genres</v-tab>
         </v-tabs>
@@ -169,7 +174,7 @@ async function createBook(bookValues) {
       </v-col>
     </v-row>
     <v-tabs-window v-model="tab">
-      <v-tabs-window-item v-for="n in 3" :key="n" :value="n">
+      <v-tabs-window-item  :key="1" :value="1">
         <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details
           single-line class="mb-4 px-6"></v-text-field>
         <v-container fluid>
@@ -181,6 +186,24 @@ async function createBook(bookValues) {
             <v-col cols="12" class="text-center py-10">
               <v-icon size="48" color="grey">mdi-book-off-outline</v-icon>
               <div class="text-h6 mt-2">No books found</div>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-tabs-window-item>
+       <v-tabs-window-item :key="2" :value="2">
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+             <span>content coming soon</span>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-tabs-window-item>
+       <v-tabs-window-item :key="3" :value="3">
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <span>content coming soon</span>
             </v-col>
           </v-row>
         </v-container>

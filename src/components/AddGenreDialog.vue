@@ -43,7 +43,7 @@ watch(
   <v-dialog :model-value="modelValue"
     @update:model-value="emit('update:modelValue', $event)" max-width="500">
     <v-card>
-      <v-card-title>Add Author</v-card-title>
+      <v-card-title>Genre</v-card-title>
       <v-card-text>
         <v-text-field
           v-model="localGenre.bookGenre"
