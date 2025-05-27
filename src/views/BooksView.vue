@@ -6,12 +6,15 @@ import AuthorServices from "../services/AuthorServices.js";
 import GenresList from "../components/GenresList.vue";
 import AddGenreDialog from "../components/AddGenreDialog.vue";
 import GenreServices from "../services/GenreServices.js";
+import BookCard from "../components/BookCard.vue";
+import AddBookDialog from "../components/AddBookDialog.vue";
 import BookServices from "../services/BookServices.js";
 
 const tab = ref(null);
 const loading = ref(false);
 const search = ref("");
 const user = ref(null);
+const bookData = ref([]);
 const showAuthorDialog = ref(false);
 const showGenreDialog = ref(false);
 const authorCardRef = ref(null);
@@ -28,6 +31,7 @@ const snackbar = ref({
 onMounted(async () => {
   user.value = JSON.parse(localStorage.getItem("user"));
   if (user) {
+    await fetchBooks();
     try {
       const authorRes = await AuthorServices.getAuthors(user.value.id);
       authors.value = authorRes.data;
@@ -65,7 +69,7 @@ async function createAuthor(values) {
     .catch((error) => {
       snackbar.value.value = true;
       snackbar.value.color = "error";
-      snackbar.value.text = error?.response?.data?.message;
+      snackbar.value.text = error?.response?.data?.message || "An error occurred while adding the author.";
     });
 }
 
@@ -87,11 +91,23 @@ async function createGenre(values) {
     .catch((error) => {
       snackbar.value.value = true;
       snackbar.value.color = "error";
-      snackbar.value.text = error?.response?.data?.message;
+      snackbar.value.text = error?.response?.data?.message || "An error occurred while adding the genre.";
     });
 }
 function closeSnackBar() {
   snackbar.value.value = false;
+}
+
+async function fetchBooks() {
+  loading.value = true;
+  try {
+    const response = await BookServices.getBooks();
+    bookData.value = response.data;
+  } catch (error) {
+    console.error("Error fetching books:", error);
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function createBook(bookValues) {
@@ -102,6 +118,7 @@ async function createBook(bookValues) {
   await BookServices.addBook(payload)
     .then(async (response) => {
       if (response?.status === 200) {
+        await fetchBooks();
         showAddBookDialog.value = false;
         snackbar.value.value = true;
         snackbar.value.color = "green";
@@ -145,7 +162,8 @@ async function createBook(bookValues) {
           color="secondary">
           Add Author
         </v-btn>
-        <v-btn variant="outlined" @click="showGenreDialog = true" v-if="tab === 5" class="my-2 header-btn" color="secondary">
+        <v-btn variant="outlined" @click="showGenreDialog = true" v-if="tab === 5" class="my-2 header-btn"
+          color="secondary">
           Add Genre
         </v-btn>
       </v-col>
@@ -155,8 +173,15 @@ async function createBook(bookValues) {
         <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details
           single-line class="mb-4 px-6"></v-text-field>
         <v-container fluid>
-          <v-row>
-              <span>Content Coming Soon</span>
+          <v-row v-if="bookData && bookData.length">
+            <BookCard v-for="book in bookData" :key="book.id" :book="book" :tab="tab" :loading="loading"
+              @edit="openEditModal" @delete="openDeleteDialog" @reserve="reserve" />
+          </v-row>
+          <v-row v-else>
+            <v-col cols="12" class="text-center py-10">
+              <v-icon size="48" color="grey">mdi-book-off-outline</v-icon>
+              <div class="text-h6 mt-2">No books found</div>
+            </v-col>
           </v-row>
         </v-container>
       </v-tabs-window-item>
@@ -185,7 +210,6 @@ async function createBook(bookValues) {
   </v-card>
   <v-snackbar v-model="snackbar.value" rounded="pill">
     {{ snackbar.text }}
-
     <template v-slot:actions>
       <v-btn :color="snackbar.color" variant="text" @click="closeSnackBar()">
         Close
