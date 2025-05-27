@@ -9,7 +9,7 @@ export default {
   },
   loginUser(user) {
     console.log(user);
-    return apiClient.post("login", user.value, {
+    return apiClient.post("signin", user.value, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",

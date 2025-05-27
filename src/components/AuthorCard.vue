@@ -27,7 +27,6 @@ watch(
   }
 );
 onMounted(async () => {
-  // await getRecipeIngredients();
   user.value = JSON.parse(localStorage.getItem("user"));
   console.log(user.value, "24::");
   await getAuthors();
@@ -46,7 +45,7 @@ async function getAuthors() {
 function openEditAuthor(author) {
   selectedAuthor.value = {
     authorName: author.authorName,
-    booksPublished: author.books,
+    booksPublished: author.booksPublished,
     description: author.description,
     authorId: author.id
   };
@@ -54,8 +53,7 @@ function openEditAuthor(author) {
 }
 
 async function updateAuthor(values) {
-  const userId = user.value.id;
-  await AuthorServices.updateAuthor(userId, values)
+  await AuthorServices.updateAuthor(values?.authorId, values)
     .then((response) => {
       console.log(response, "response::");
       if (response?.status === 200) {
@@ -119,7 +117,7 @@ defineExpose({ getAuthors });
           </v-chip>
           <v-chip class="ma-2" color="accent" label>
             <v-icon start icon="mdi-book-edit"></v-icon>
-            {{ author?.books }} Books Published
+            {{ author?.booksPublished }} Books Published
           </v-chip>
         </v-col>
         <v-col class="d-flex justify-end">
