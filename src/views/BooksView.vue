@@ -1,12 +1,12 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
-import DeleteConfirmationDialog from "../components/DeleteConfirmationDialog.vue";
 import AuthorCard from "../components/AuthorCard.vue";
 import AddAuthorDialog from "../components/AddAuthorDialog.vue";
 import AuthorServices from "../services/AuthorServices.js";
 import GenresList from "../components/GenresList.vue";
 import AddGenreDialog from "../components/AddGenreDialog.vue";
 import GenreServices from "../services/GenreServices.js";
+import BookServices from "../services/BookServices.js";
 
 const tab = ref(null);
 const loading = ref(false);
@@ -16,6 +16,9 @@ const showAuthorDialog = ref(false);
 const showGenreDialog = ref(false);
 const authorCardRef = ref(null);
 const genresListRef = ref(null);
+const showAddBookDialog = ref(false);
+const authors = ref([]);
+const genres = ref([]);
 const snackbar = ref({
   value: false,
   color: "",
@@ -24,6 +27,20 @@ const snackbar = ref({
 
 onMounted(async () => {
   user.value = JSON.parse(localStorage.getItem("user"));
+  if (user) {
+    try {
+      const authorRes = await AuthorServices.getAuthors(user.value.id);
+      authors.value = authorRes.data;
+    } catch (e) {
+      authors.value = [];
+    }
+    try {
+      const genreRes = await GenreServices.getGenres(user.value.id);
+      genres.value = genreRes.data;
+    } catch (e) {
+      genres.value = [];
+    }
+  }
 });
 
 watch(tab, () => {
@@ -76,6 +93,29 @@ async function createGenre(values) {
 function closeSnackBar() {
   snackbar.value.value = false;
 }
+
+async function createBook(bookValues) {
+  const payload = {
+    ...bookValues,
+    userId: user.value.id,
+  };
+  await BookServices.addBook(payload)
+    .then(async (response) => {
+      if (response?.status === 200) {
+        showAddBookDialog.value = false;
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = `${response?.data?.bookName} added successfully!`;
+      }
+    })
+    .catch((error) => {
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text = error?.response?.data?.message || "An error occurred while adding the book.";
+    });
+  showAddBookDialog.value = false;
+}
+
 </script>
 
 <style>
@@ -97,6 +137,10 @@ function closeSnackBar() {
         </v-tabs>
       </v-col>
       <v-col cols="2">
+        <v-btn variant="outlined" @click="showAddBookDialog = true" v-if="tab === 1" class="my-2 header-btn"
+          color="secondary">
+          Add Book
+        </v-btn>
         <v-btn variant="outlined" @click="showAuthorDialog = true" v-if="tab === 4" class="my-2 header-btn"
           color="secondary">
           Add Author
@@ -135,6 +179,7 @@ function closeSnackBar() {
         </v-container>
       </v-tabs-window-item>
     </v-tabs-window>
+    <AddBookDialog v-model="showAddBookDialog" :authors="authors" :genres="genres" @submit="createBook" />
     <AddAuthorDialog v-model="showAuthorDialog" @submit="createAuthor" />
     <AddGenreDialog v-model="showGenreDialog" @submit="createGenre" />
   </v-card>
