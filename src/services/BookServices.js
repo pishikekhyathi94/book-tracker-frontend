@@ -13,4 +13,7 @@ export default {
   removeBookFromWhislist(bookId) {
     return apiClient.delete("wishlist/remove/book/" + bookId);
   },
+   getWhislist(userId) {
+    return apiClient.get("wishlist?userId="+userId);
+  },
 };
