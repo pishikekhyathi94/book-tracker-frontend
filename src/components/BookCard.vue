@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
+import BookServices from "../services/BookServices.js";
 
 const props = defineProps({
   book: { type: Object, required: true },
@@ -7,7 +8,7 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['edit', 'delete', 'viewDetails']);
+const emit = defineEmits(['edit', 'delete', 'wishlistUpdated']);
 const snackbar = ref({
   value: false,
   color: "",
@@ -39,6 +40,22 @@ async function whislistBook() {
     snackbar.value.value = true;
       snackbar.value.color = "error";
       snackbar.value.text = error?.response?.data?.message || "Error adding book to wishlist.";
+  }
+}
+async function removeWhislistBook() {
+  try {
+    await BookServices.removeBookFromWhislist(props.id).then((response) => {
+      if (response?.status === 200) {
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = `Book removed from your wishlist successfully!`;
+        emit("wishlistUpdated");
+      }
+    });
+  } catch (error) {
+    snackbar.value.value = true;
+    snackbar.value.color = "error";
+    snackbar.value.text = error?.response?.data?.message || "Error removing book from wishlist.";
   }
 }
 function closeSnackBar() {
@@ -84,12 +101,14 @@ function closeSnackBar() {
       <v-col cols="6" class="pa-0">
         <v-btn color="primary" text="View Details" border @click="viewDetails" class="header-btn"></v-btn>
       </v-col>
-        <v-col cols="6" class="d-flex pa-0 justify-end">
-          <v-btn
+      <v-col cols="6" class="d-flex pa-0 justify-end">
+        <v-btn color="red" v-if="tab !== 2" icon="mdi-pencil-box-outline" size="large" @click="openEdit"></v-btn>
+       <v-btn
             v-if="tab === 2 || (tab === 1 && book?.isWhislisted)"
             color="red"
             icon="mdi-heart"
             size="large"
+             @click="removeWhislistBook"
           ></v-btn>
           <v-btn
             v-if="tab === 1 && !book?.isWhislisted"
@@ -98,12 +117,6 @@ function closeSnackBar() {
             size="large"
             @click="whislistBook"
           ></v-btn>
-        </v-col>
-      <v-col cols="6" class="d-flex pa-0 justify-end">
-        <v-btn color="red" v-if="tab !== 2" icon="mdi-pencil-box-outline" size="large" @click="openEdit"></v-btn>
-        <v-btn v-if="book?.wishlist" color="red" icon="mdi-heart" size="large"></v-btn>
-        <v-btn v-if="!book?.wishlist" color="red" icon="mdi-heart-outline" size="large"></v-btn>
-        <v-btn v-if="tab !== 2" color="red" icon="mdi-delete" @click="openDelete" size="large"></v-btn>
       </v-col>
     </v-card-actions>
   </v-card>
