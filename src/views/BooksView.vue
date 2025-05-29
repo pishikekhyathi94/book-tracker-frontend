@@ -200,8 +200,8 @@ async function saveBookDetails(updatedBook) {
     userId: user.value.id,
     bookCoverImage: updatedBook.bookCoverImage,
     bookDescription: updatedBook.bookDescription,
-    authorId: updatedBook.bookAuthorId,
-    genreId: updatedBook.bookGenreId,
+    bookAuthorId: updatedBook.bookAuthorId,
+    bookGenreId: updatedBook.bookGenreId,
   })
     .then(async (response) => {
       if (response?.status === 200) {
@@ -257,7 +257,7 @@ async function saveBookDetails(updatedBook) {
     </v-row>
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="n in 2" :key="n" :value="n">
-        <v-text-field
+        <!-- <v-text-field
           v-model="search"
           label="Search"
           prepend-inner-icon="mdi-magnify"
@@ -265,7 +265,7 @@ async function saveBookDetails(updatedBook) {
           hide-details
           single-line
           class="mb-4 px-6"
-        ></v-text-field>
+        ></v-text-field> -->
         <v-container fluid>
           <v-row v-if="bookData && bookData.length && tab === 1">
             <BookCard

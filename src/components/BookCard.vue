@@ -4,10 +4,11 @@ import BookServices from "../services/BookServices.js";
 
 const props = defineProps({
   book: { type: Object, required: true },
+  user: { type: Object, required: true },
   tab: { type: [Number, String], default: 1 },
   loading: { type: Boolean, default: false },
+  id: { type: [Number, String], default: null },
 });
-
 const emit = defineEmits(['edit', 'delete', 'wishlistUpdated']);
 const snackbar = ref({
   value: false,
@@ -76,7 +77,7 @@ function closeSnackBar() {
       <v-progress-linear :active="isActive" color="deep-purple" height="4" indeterminate></v-progress-linear>
     </template>
 
-    <v-img height="200" :src="book.bookCoverImage" class="book-cover-image"></v-img>
+    <v-img height="200" :src="book?.bookCoverImage" class="book-cover-image"></v-img>
 
     <v-card-item>
       <v-card-title class="text-h5 font-weight-bold">{{ book?.bookName }}</v-card-title>
