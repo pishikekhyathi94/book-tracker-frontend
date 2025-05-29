@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted } from "vue";
-import { ref, toRaw } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import UserServices from "../services/UserServices.js";
 import booksBg from "../assets/images/booksbg.jpg";
@@ -18,6 +18,7 @@ const user = ref({
   email: "",
   password: "",
 });
+const showPassword = ref(false);
 
 onMounted(async () => {
   localStorage.removeItem("user");
@@ -26,20 +27,41 @@ onMounted(async () => {
   }
 });
 
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value;
+}
+
+function validatePassword() {
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(user.value.password)) {
+    snackbar.value = {
+      value: true,
+      color: "error",
+      text: "Password must be at least 8 characters long, include one uppercase letter, one number, and one special character.",
+    };
+    return false;
+  }
+  return true;
+}
+
 async function createAccount() {
-  await UserServices.addUser(user.value)
-    .then(() => {
-      snackbar.value.value = true;
-      snackbar.value.color = "green";
-      snackbar.value.text = "Account created successfully!";
-      router.push({ name: "login" });
-    })
-    .catch((error) => {
-      console.log(error);
-      snackbar.value.value = true;
-      snackbar.value.color = "error";
-      snackbar.value.text = error.response.data.message;
-    });
+  if (validatePassword()) {
+    await UserServices.addUser(user.value)
+      .then(() => {
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = "Account created successfully!";
+        closeCreateAccount();
+        router.push({ name: "login" });
+      })
+      .catch((error) => {
+        console.log(error);
+        snackbar.value.value = true;
+        snackbar.value.color = "error";
+        snackbar.value.text = error.response.data.message;
+      });
+  }
 }
 
 async function login() {
@@ -61,10 +83,24 @@ async function login() {
 
 function openCreateAccount() {
   isCreateAccount.value = true;
+  showPassword.value = false;
+  user.value = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  };
 }
 
 function closeCreateAccount() {
   isCreateAccount.value = false;
+  showPassword.value = false;
+  user.value = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+  };
 }
 
 function closeSnackBar() {
@@ -99,12 +135,16 @@ function closeSnackBar() {
             <v-text-field
               v-model="user.email"
               label="Email"
+              type="email"
               required
             ></v-text-field>
 
             <v-text-field
               v-model="user.password"
               label="Password"
+              :type="showPassword ? 'text' : 'password'"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="togglePasswordVisibility"
               required
             ></v-text-field>
           </v-card-text>
@@ -119,8 +159,7 @@ function closeSnackBar() {
         </v-card>
       </v-col>
     </v-row>
-
-        <v-dialog persistent v-model="isCreateAccount" width="800">
+    <v-dialog persistent v-model="isCreateAccount" width="800">
       <v-card class="rounded-lg elevation-5">
         <v-card-title class="headline mb-2">Create Account </v-card-title>
         <v-card-text>
@@ -139,12 +178,16 @@ function closeSnackBar() {
           <v-text-field
             v-model="user.email"
             label="Email"
+            type="email"
             required
           ></v-text-field>
 
           <v-text-field
             v-model="user.password"
             label="Password"
+            :type="showPassword ? 'text' : 'password'"
+            :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+            @click:append-inner="togglePasswordVisibility"
             required
           ></v-text-field>
         </v-card-text>

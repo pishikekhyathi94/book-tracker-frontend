@@ -45,16 +45,6 @@ function saveBookDetails() {
           label="Book Name"
           outlined
         ></v-text-field>
-        <v-text-field
-          v-model="localBook.bookGenre.bookGenre"
-          label="Category"
-          outlined
-        ></v-text-field>
-        <v-text-field
-          v-model="localBook.bookAuthor.authorName"
-          label="Author"
-          outlined
-        ></v-text-field>
         <v-textarea
           v-model="localBook.bookCoverImage"
           label="Book Cover Image URL"
