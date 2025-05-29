@@ -10,4 +10,7 @@ export default {
   addBookToWhislist(bookValues) {
     return apiClient.post("wishlist/book", bookValues);
   },
+  removeBookFromWhislist(bookId) {
+    return apiClient.delete("wishlist/remove/book/" + bookId);
+  },
 };
