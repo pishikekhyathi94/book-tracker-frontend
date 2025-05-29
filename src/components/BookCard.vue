@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, ref } from 'vue';
 
 const props = defineProps({
   book: { type: Object, required: true },
@@ -8,6 +8,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['edit', 'delete', 'viewDetails']);
+const snackbar = ref({
+  value: false,
+  color: "",
+  text: "",
+});
 
 function openEdit() {
   emit('edit', props.book);
@@ -17,6 +22,27 @@ function openDelete() {
 }
 function viewDetails() {
   emit('viewDetails', props.book);
+}
+async function whislistBook() {
+  try {
+    await BookServices.addBookToWhislist({
+      bookId: props.book.id,
+      userId: props.user.id,
+    }).then((response) => {
+      if (response?.status === 200) {
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = `Book added to you whislist successfully!`;
+      }
+    });
+  } catch (error) {
+    snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text = error?.response?.data?.message || "Error adding book to wishlist.";
+  }
+}
+function closeSnackBar() {
+  snackbar.value.value = false;
 }
 </script>
 
@@ -58,6 +84,21 @@ function viewDetails() {
       <v-col cols="6" class="pa-0">
         <v-btn color="primary" text="View Details" border @click="viewDetails" class="header-btn"></v-btn>
       </v-col>
+        <v-col cols="6" class="d-flex pa-0 justify-end">
+          <v-btn
+            v-if="tab === 2 || (tab === 1 && book?.isWhislisted)"
+            color="red"
+            icon="mdi-heart"
+            size="large"
+          ></v-btn>
+          <v-btn
+            v-if="tab === 1 && !book?.isWhislisted"
+            color="red"
+            icon="mdi-heart-outline"
+            size="large"
+            @click="whislistBook"
+          ></v-btn>
+        </v-col>
       <v-col cols="6" class="d-flex pa-0 justify-end">
         <v-btn color="red" v-if="tab !== 2" icon="mdi-pencil-box-outline" size="large" @click="openEdit"></v-btn>
         <v-btn v-if="book?.wishlist" color="red" icon="mdi-heart" size="large"></v-btn>
@@ -67,4 +108,12 @@ function viewDetails() {
     </v-card-actions>
   </v-card>
   </v-col>
+    <v-snackbar v-model="snackbar.value" rounded="pill">
+      {{ snackbar.text }}
+      <template v-slot:actions>
+        <v-btn :color="snackbar.color" variant="text" @click="closeSnackBar()">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
 </template>
