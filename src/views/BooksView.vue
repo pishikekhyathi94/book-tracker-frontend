@@ -37,26 +37,33 @@ onMounted(async () => {
   }
 });
 
-watch(tab, async () => {
+watch(tab, async (newTab) => {
   search.value = "";
+  if (newTab === 1) {
+    await fetchBooks();
+    await getAuthors();
+    await getGeners();
+  } else if (newTab === 2) {
+    await getWhislist();
+  }
 });
 
 async function getAuthors(){
-  try {
-        const authorRes = await AuthorServices.getAuthors(user.value.id);
-        authors.value = authorRes.data;
-      } catch (e) {
-        authors.value = [];
-      }
+    try {
+      const authorRes = await AuthorServices.getAuthors(user.value.id);
+      authors.value = authorRes.data;
+    } catch (e) {
+      authors.value = [];
+    }
 }
 async function getGeners(){
-  try {
-        const genreRes = await GenreServices.getGenres(user.value.id);
-        genres.value = genreRes.data;
-      } catch (e) {
-        genres.value = [];
-      }
-}
+    try {
+      const genreRes = await GenreServices.getGenres(user.value.id);
+      genres.value = genreRes.data;
+    } catch (e) {
+      genres.value = [];
+    }
+  }
 
 async function createAuthor(values) {
   const payload = {
@@ -140,6 +147,14 @@ async function createBook(bookValues) {
   showAddBookDialog.value = false;
 }
 
+async function getWhislist() {
+  try {
+    const response = await BookServices.getWhislist(user.value.id);
+    bookData.value = response.data;
+  } catch (error) {
+    console.error("Error fetching wishlist:", error);
+  }
+}
 </script>
 
 <style>
@@ -154,6 +169,7 @@ async function createBook(bookValues) {
       <v-col cols="10">
         <v-tabs v-model="tab" align-tabs="left" color="secondary" class="mb-4 px-6">
           <v-tab :value="1">Books List</v-tab>
+          <v-tab :value="2">Whislist</v-tab>
           <v-tab :value="4">Authors</v-tab>
           <v-tab :value="5">Genres</v-tab>
         </v-tabs>
@@ -174,36 +190,48 @@ async function createBook(bookValues) {
       </v-col>
     </v-row>
     <v-tabs-window v-model="tab">
-      <v-tabs-window-item  :key="1" :value="1">
-        <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" variant="outlined" hide-details
-          single-line class="mb-4 px-6"></v-text-field>
+      <v-tabs-window-item v-for="n in 2" :key="n" :value="n">
+        <v-text-field
+          v-model="search"
+          label="Search"
+          prepend-inner-icon="mdi-magnify"
+          variant="outlined"
+          hide-details
+          single-line
+          class="mb-4 px-6"
+        ></v-text-field>
         <v-container fluid>
-          <v-row v-if="bookData && bookData.length">
-            <BookCard v-for="book in bookData" :key="book.id" :book="book" :tab="tab" :loading="loading"
-              @edit="openEditModal" @delete="openDeleteDialog" @reserve="reserve" />
+          <v-row v-if="bookData && bookData.length && tab === 1">
+            <BookCard
+              v-for="book in bookData"
+              :key="book.id"
+              :id="book.id"
+              :book="book"
+              :user="user"
+              :tab="tab"
+              :loading="loading"
+              @edit="openEditModal"
+              @delete="openDeleteDialog"
+            />
           </v-row>
-          <v-row v-else>
+          <v-row v-if="bookData && bookData.length && tab === 2">
+            <BookCard
+              v-for="book in bookData"
+              :id="book.id"
+              :key="book.id"
+              :book="book.book"
+              :user="user"
+              :tab="tab"
+              :loading="loading"
+              @edit="openEditModal"
+              @delete="openDeleteDialog"
+              @wishlistUpdated="getWhislist"
+            />
+          </v-row>
+          <v-row v-if="bookData && bookData.length === 0">
             <v-col cols="12" class="text-center py-10">
               <v-icon size="48" color="grey">mdi-book-off-outline</v-icon>
               <div class="text-h6 mt-2">No books found</div>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-tabs-window-item>
-       <v-tabs-window-item :key="2" :value="2">
-        <v-container>
-          <v-row>
-            <v-col cols="12">
-             <span>content coming soon</span>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-tabs-window-item>
-       <v-tabs-window-item :key="3" :value="3">
-        <v-container>
-          <v-row>
-            <v-col cols="12">
-              <span>content coming soon</span>
             </v-col>
           </v-row>
         </v-container>
