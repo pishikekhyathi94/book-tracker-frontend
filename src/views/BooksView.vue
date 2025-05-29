@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import AuthorCard from "../components/AuthorCard.vue";
+import DeleteConfirmationDialog from "../components/DeleteConfirmationDialog.vue";
 import AddAuthorDialog from "../components/AddAuthorDialog.vue";
 import AuthorServices from "../services/AuthorServices.js";
 import GenresList from "../components/GenresList.vue";
@@ -20,6 +21,8 @@ const showGenreDialog = ref(false);
 const authorCardRef = ref(null);
 const genresListRef = ref(null);
 const showAddBookDialog = ref(false);
+const isDeleteDialogOpen = ref(false);
+const bookToDelete = ref(null);
 const authors = ref([]);
 const genres = ref([]);
 const snackbar = ref({
@@ -155,6 +158,33 @@ async function getWhislist() {
     console.error("Error fetching wishlist:", error);
   }
 }
+function openDeleteDialog(book) {
+  bookToDelete.value = book;
+  isDeleteDialogOpen.value = true;
+}
+async function confirmDelete() {
+  await BookServices.deletebook(bookToDelete?.value?.id)
+    .then(async (response) => {
+      if (response?.status === 200) {
+        await fetchBooks();
+        isDeleteDialogOpen.value = false;
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = `Book deleted successfully!`;
+      }
+    })
+    .catch((error) => {
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text =
+        error?.response?.data?.message ||
+        "An error occurred while deleting the book.";
+    });
+}
+
+function cancelDelete() {
+  isDeleteDialogOpen.value = false;
+}
 </script>
 
 <style>
@@ -258,6 +288,12 @@ async function getWhislist() {
     <AddBookDialog v-model="showAddBookDialog" :authors="authors" :genres="genres" @submit="createBook" />
     <AddAuthorDialog v-model="showAuthorDialog" @submit="createAuthor" />
     <AddGenreDialog v-model="showGenreDialog" @submit="createGenre" />
+    <DeleteConfirmationDialog
+      v-model="isDeleteDialogOpen"
+      message="Are you sure you want to delete this book?"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </v-card>
   <v-snackbar v-model="snackbar.value" rounded="pill">
     {{ snackbar.text }}
