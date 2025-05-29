@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import AuthorCard from "../components/AuthorCard.vue";
+import EditBookDialog from "../components/EditBookDialog.vue";
 import DeleteConfirmationDialog from "../components/DeleteConfirmationDialog.vue";
 import AddAuthorDialog from "../components/AddAuthorDialog.vue";
 import AuthorServices from "../services/AuthorServices.js";
@@ -23,6 +24,8 @@ const genresListRef = ref(null);
 const showAddBookDialog = ref(false);
 const isDeleteDialogOpen = ref(false);
 const bookToDelete = ref(null);
+const isEditDialogOpen = ref(false);
+const selectedBook = ref(null);
 const authors = ref([]);
 const genres = ref([]);
 const snackbar = ref({
@@ -185,6 +188,39 @@ async function confirmDelete() {
 function cancelDelete() {
   isDeleteDialogOpen.value = false;
 }
+
+function openEditModal(book) {
+  selectedBook.value = { ...book };
+  isEditDialogOpen.value = true;
+}
+
+async function saveBookDetails(updatedBook) {
+  await BookServices.updateBook(updatedBook?.id, {
+    bookName: updatedBook.bookName,
+    userId: user.value.id,
+    bookCoverImage: updatedBook.bookCoverImage,
+    bookDescription: updatedBook.bookDescription,
+    authorId: updatedBook.bookAuthorId,
+    genreId: updatedBook.bookGenreId,
+  })
+    .then(async (response) => {
+      if (response?.status === 200) {
+        await fetchBooks();
+        isEditDialogOpen.value = false;
+        selectedBook.value = null;
+        snackbar.value.value = true;
+        snackbar.value.color = "green";
+        snackbar.value.text = `Book updated successfully!`;
+      }
+    })
+    .catch((error) => {
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text =
+        error?.response?.data?.message ||
+        "An error occurred while updating the book.";
+    });
+}
 </script>
 
 <style>
@@ -293,6 +329,13 @@ function cancelDelete() {
       message="Are you sure you want to delete this book?"
       @confirm="confirmDelete"
       @cancel="cancelDelete"
+    />
+    <EditBookDialog
+      v-model="isEditDialogOpen"
+      :book="selectedBook"
+      :authors="authors"
+      :genres="genres"
+      @save="saveBookDetails"
     />
   </v-card>
   <v-snackbar v-model="snackbar.value" rounded="pill">
