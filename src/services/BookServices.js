@@ -18,5 +18,8 @@ export default {
   },
    deletebook(bookId) {
     return apiClient.delete("delete/book/" + bookId);
-  }
+  },
+  updateBook(bookId, book) {
+    return apiClient.put("update/book/" + bookId, book);
+  },
 };
