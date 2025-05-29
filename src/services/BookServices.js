@@ -16,4 +16,7 @@ export default {
    getWhislist(userId) {
     return apiClient.get("wishlist?userId="+userId);
   },
+   deletebook(bookId) {
+    return apiClient.delete("delete/book/" + bookId);
+  }
 };

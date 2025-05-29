@@ -117,6 +117,13 @@ function closeSnackBar() {
             size="large"
             @click="whislistBook"
           ></v-btn>
+          <v-btn
+            v-if="tab !== 2"
+            color="red"
+            icon="mdi-delete"
+            @click="openDelete"
+            size="large"
+          ></v-btn>
       </v-col>
     </v-card-actions>
   </v-card>
