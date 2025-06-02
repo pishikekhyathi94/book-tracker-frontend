@@ -14,18 +14,22 @@ onMounted(() => {
   user.value = JSON.parse(localStorage.getItem("user"));
 });
 
-function logout() {
-  UserServices.logoutUser()
+async function logout() {
+  await UserServices.logoutUser()
     .then((data) => {
-      console.log(data);
     })
     .catch((error) => {
       console.log(error);
     });
-  localStorage.removeItem("user");
-  user.value = null;
-  router.push({ name: "login" });
+    localStorage.removeItem("user");
+    user.value = null;
+    router.push({ name: "login" });
 }
+
+function gotoProfile() {
+  router.push({ name: "profile" });
+}
+
 </script>
 
 <style>
@@ -40,7 +44,7 @@ function logout() {
 <template>
   <div>
     <v-app-bar color="primary" app dark>
-      <router-link :to="{ name: '' }">
+      <router-link :to="{ name: 'books' }">
         <v-img
           class="mx-2 my-round-image"
           :src="logoURL"
@@ -53,9 +57,9 @@ function logout() {
       <v-menu v-if="user !== null" min-width="200px" rounded>
         <template v-slot:activator="{ props }">
           <v-btn icon v-bind="props">
-            <v-avatar class="mx-auto text-center" color="accent" size="large">
+            <v-avatar class="mx-auto text-center" color="secondary" size="large">
               <span class="white--text font-weight-bold">{{
-                `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`
+                `${user?.firstName.charAt(0)}${user?.lastName.charAt(0)}`
               }}</span>
             </v-avatar>
           </v-btn>
@@ -70,9 +74,10 @@ function logout() {
               </v-avatar>
               <h3>{{ `${user.firstName} ${user.lastName}` }}</h3>
               <p class="text-caption mt-1">
-                {{ user.email }}
+                {{ user?.email }}
               </p>
               <v-divider class="my-3"></v-divider>
+              <v-btn rounded variant="text" @click="gotoProfile()">Profile</v-btn>
               <v-btn rounded variant="text" @click="logout()"> Logout </v-btn>
             </div>
           </v-card-text>
