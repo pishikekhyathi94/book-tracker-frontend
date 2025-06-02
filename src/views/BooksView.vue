@@ -43,6 +43,24 @@ onMounted(async () => {
   }
 });
 
+watch(search, async (val) => {
+  if (val && val.length >= 3) {
+    if (tab.value === 1) {
+      await searchBooks(val);
+    } else if (tab.value === 2) {
+      bookData.value = bookData.value.filter((book) =>
+        book.book.bookName.toLowerCase().includes(val.toLowerCase())
+      );
+    }
+  } else {
+    if (tab.value === 1) {
+      await fetchBooks();
+    } else if (tab.value === 2) {
+      await getWhislist();
+    }
+  }
+});
+
 watch(tab, async (newTab) => {
   search.value = "";
   if (newTab === 1) {
@@ -53,6 +71,18 @@ watch(tab, async (newTab) => {
     await getWhislist();
   }
 });
+
+async function searchBooks(bookName) {
+  loading.value = true;
+  try {
+    const res = await BookServices.searchBooks(bookName);
+    bookData.value = res.data;
+  } catch (e) {
+    bookData.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
 
 async function getAuthors(){
     try {
@@ -235,7 +265,7 @@ async function saveBookDetails(updatedBook) {
       <v-col cols="10">
         <v-tabs v-model="tab" align-tabs="left" color="secondary" class="mb-4 px-6">
           <v-tab :value="1">Books List</v-tab>
-          <v-tab :value="2">Whislist</v-tab>
+          <v-tab :value="2">Whishlist</v-tab>
           <v-tab :value="4">Authors</v-tab>
           <v-tab :value="5">Genres</v-tab>
         </v-tabs>
@@ -257,7 +287,7 @@ async function saveBookDetails(updatedBook) {
     </v-row>
     <v-tabs-window v-model="tab">
       <v-tabs-window-item v-for="n in 2" :key="n" :value="n">
-        <!-- <v-text-field
+        <v-text-field
           v-model="search"
           label="Search"
           prepend-inner-icon="mdi-magnify"
@@ -265,7 +295,7 @@ async function saveBookDetails(updatedBook) {
           hide-details
           single-line
           class="mb-4 px-6"
-        ></v-text-field> -->
+        ></v-text-field> 
         <v-container fluid>
           <v-row v-if="bookData && bookData.length && tab === 1">
             <BookCard

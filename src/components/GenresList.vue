@@ -9,7 +9,6 @@ const router = useRouter();
 const showDetails = ref(false);
 const user = ref(null);
 const genres = ref([]);
-const search = ref("");
 const showGenreDialog = ref(false);
 const selectedGenre = ref(null);
 const isDeleteDialogOpen = ref(false);
@@ -20,12 +19,6 @@ const props = defineProps({
   },
 });
 
-watch(
-  () => props.tab,
-  (newTab) => {
-    search.value = "";
-  }
-);
 onMounted(async () => {
   user.value = JSON.parse(localStorage.getItem("user"));
   console.log(user.value, "24::");
@@ -92,15 +85,6 @@ defineExpose({ getGenres });
 </script>
 
 <template>
-  <v-text-field
-    v-model="search"
-    label="Search"
-    prepend-inner-icon="mdi-magnify"
-    variant="outlined"
-    hide-details
-    single-line
-    class="mb-4 px-6"
-  ></v-text-field>
   <v-card
     class="rounded-lg elevation-5 mb-5 mx-6"
     @click="showDetails = !showDetails"
