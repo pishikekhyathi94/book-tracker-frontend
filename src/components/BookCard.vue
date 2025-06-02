@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps, defineEmits, ref } from 'vue';
+import BookDetails from "./BookDetails.vue";
 import BookServices from "../services/BookServices.js";
 
 const props = defineProps({
@@ -9,6 +10,9 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   id: { type: [Number, String], default: null },
 });
+
+const isBookDetailsDialogOpen = ref(false);
+const selectedBook = ref({});
 const emit = defineEmits(['edit', 'delete', 'wishlistUpdated']);
 const snackbar = ref({
   value: false,
@@ -23,7 +27,8 @@ function openDelete() {
   emit('delete', props.book);
 }
 function viewDetails() {
-  emit('viewDetails', props.book);
+  selectedBook.value = props.book;
+  isBookDetailsDialogOpen.value = true;
 }
 async function whishlistBook() {
   try {
@@ -137,6 +142,7 @@ function closeSnackBar() {
       </v-card-actions>
     </v-card>
   </v-col>
+   <BookDetails v-model="isBookDetailsDialogOpen" :book="selectedBook" />
   <v-snackbar v-model="snackbar.value" rounded="pill">
       {{ snackbar.text }}
       <template v-slot:actions>

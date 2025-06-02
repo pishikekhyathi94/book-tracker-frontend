@@ -68,12 +68,6 @@ onMounted(() => {
 
 <template>
   <v-container>
-    <!-- Header with Back Button -->
-    <!-- <v-app-bar color="primary" dark>
-      <v-toolbar-title>Profile</v-toolbar-title>
-    </v-app-bar> -->
-
-    <!-- Search Bar -->
     <v-row class="align-center">
       <v-col cols="2">
         <v-btn @click="goBack" variant="text" prepend-icon="mdi-check-circle">
