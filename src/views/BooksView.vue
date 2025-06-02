@@ -99,7 +99,7 @@ async function getGeners(){
     } catch (e) {
       genres.value = [];
     }
-  }
+}
 
 async function createAuthor(values) {
   const payload = {
@@ -295,7 +295,7 @@ async function saveBookDetails(updatedBook) {
           hide-details
           single-line
           class="mb-4 px-6"
-        ></v-text-field> 
+        ></v-text-field>
         <v-container fluid>
           <v-row v-if="bookData && bookData.length && tab === 1">
             <BookCard
@@ -308,6 +308,7 @@ async function saveBookDetails(updatedBook) {
               :loading="loading"
               @edit="openEditModal"
               @delete="openDeleteDialog"
+              @wishlistUpdated="fetchBooks"
             />
           </v-row>
           <v-row v-if="bookData && bookData.length && tab === 2">
