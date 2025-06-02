@@ -12,121 +12,120 @@ const genres = ref([]);
 const showGenreDialog = ref(false);
 const selectedGenre = ref(null);
 const isDeleteDialogOpen = ref(false);
-
+const snackbar = ref({
+  value: false,
+  color: "",
+  text: "",
+});
 const props = defineProps({
-  tab: {
-    required: true,
-  },
+    tab: {
+        required: true,
+    },
 });
 
 onMounted(async () => {
-  user.value = JSON.parse(localStorage.getItem("user"));
-  console.log(user.value, "24::");
-  await getGenres();
+    user.value = JSON.parse(localStorage.getItem("user"));
+    console.log(user.value, "24::");
+    await getGenres();
 });
 
 async function getGenres() {
-  await GenreServices.getGenres(user.value.id)
-    .then((response) => {
-      genres.value = response.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+    await GenreServices.getGenres(user.value.id)
+        .then((response) => {
+            genres.value = response.data;
+        })
+        .catch((error) => {
+            console.log(error);
+        });
 }
 
 function openEditGenre(genre) {
-  selectedGenre.value = {
-    bookGenre: genre.bookGenre,
-    description: genre.description,
-    genreId: genre.id
-  };
-  showGenreDialog.value = true;
+    selectedGenre.value = {
+        bookGenre: genre.bookGenre,
+        description: genre.description,
+        genreId: genre.id
+    };
+    showGenreDialog.value = true;
 }
 
 async function updateGenre(values) {
-  const genreId = values.genreId;
-  await GenreServices.updateGenre(genreId, values)
-    .then((response) => {
-      if (response?.status === 200) {
-         getGenres();
-        showGenreDialog.value = false;
-        snackbar.value.value = true;
-        snackbar.value.color = "green";
-        snackbar.value.text = `${values?.bookGenre} updated successfully!`;
-      }
-    })
-    .catch((error) => {
-      snackbar.value.value = true;
-      snackbar.value.color = "error";
-      snackbar.value.text = error?.response?.data?.message;
-    });
+    const genreId = values.genreId;
+    await GenreServices.updateGenre(genreId, values)
+        .then((response) => {
+            if (response?.status === 200) {
+                getGenres();
+                showGenreDialog.value = false;
+                snackbar.value.value = true;
+                snackbar.value.color = "green";
+                snackbar.value.text = `${values?.bookGenre} updated successfully!`;
+            }
+        })
+        .catch((error) => {
+            snackbar.value.value = true;
+            snackbar.value.color = "error";
+            snackbar.value.text = error?.response?.data?.message;
+        });
 }
 
 async function confirmDelete() {
-  await GenreServices.deleteGenre(selectedGenre.value.id)
-    .then((response) => {
-      if (response?.status === 200) {
-        getGenres();
-        isDeleteDialogOpen.value = false;
-        snackbar.value.value = true;
-        snackbar.value.color = "green";
-        snackbar.value.text = `Genre deleted successfully!`;
-      }
-    })
-    .catch((error) => {
-      snackbar.value.value = true;
-      snackbar.value.color = "error";
-      snackbar.value.text = error?.response?.data?.message;
-    });
+    await GenreServices.deleteGenre(selectedGenre.value.id)
+        .then((response) => {
+            if (response?.status === 200) {
+                getGenres();
+                isDeleteDialogOpen.value = false;
+                snackbar.value.value = true;
+                snackbar.value.color = "green";
+                snackbar.value.text = `Genre deleted successfully!`;
+            }
+        })
+        .catch((error) => {
+            snackbar.value.value = true;
+            snackbar.value.color = "error";
+            snackbar.value.text = error?.response?.data?.message;
+        });
 }
 
 defineExpose({ getGenres });
 </script>
 
 <template>
-  <v-card
-    class="rounded-lg elevation-5 mb-5 mx-6"
-    @click="showDetails = !showDetails"
-    v-for="genre in genres"
-  >
-    <v-card-title class="headline">
-      <v-row align="center">
-        <v-col cols="10">
-          <span class="font-weight-black">{{ genre?.bookGenre }}</span>
-        </v-col>
-        <v-col class="d-flex justify-end">
-          <v-icon
-            v-if="user !== null"
-            size="small"
-            icon="mdi-pencil"
-            @click.stop="openEditGenre(genre)"
-            class="mr-4"
-          ></v-icon>
-          <v-icon
-            v-if="user !== null"
-            size="small"
-            icon="mdi-delete"
-            @click.stop="isDeleteDialogOpen = true; selectedGenre = genre;"
-          ></v-icon>
-        </v-col>
-      </v-row>
-    </v-card-title>
-    <v-expand-transition>
-      <v-card-text class="body-1" v-show="showDetails">
-        {{ genre?.description }}
-      </v-card-text>
-    </v-expand-transition>
-  </v-card>
-  <AddGenreDialog
-    v-model="showGenreDialog"
-    :genre="selectedGenre"
-    @submit="updateGenre"
-  />
-  <DeleteConfirmationDialog
-    v-model="isDeleteDialogOpen"
-    message="Are you sure you want to delete this genre?"
-    @confirm="confirmDelete"
-  />
+    <div v-if="genres.length > 0">
+        <v-card class="rounded-lg elevation-5 mb-5 mx-6" @click="showDetails = !showDetails" v-for="genre in genres">
+            <v-card-title class="headline">
+                <v-row align="center">
+                    <v-col cols="10">
+                        <span class="font-weight-black">{{ genre?.bookGenre }}</span>
+                    </v-col>
+                    <v-col class="d-flex justify-end">
+                        <v-icon v-if="user !== null" size="small" icon="mdi-pencil" @click.stop="openEditGenre(genre)"
+                            class="mr-4"></v-icon>
+                        <v-icon v-if="user !== null" size="small" icon="mdi-delete"
+                            @click.stop="isDeleteDialogOpen = true; selectedGenre = genre;"></v-icon>
+                    </v-col>
+                </v-row>
+            </v-card-title>
+            <v-expand-transition>
+                <v-card-text class="body-1" v-show="showDetails">
+                    {{ genre?.description }}
+                </v-card-text>
+            </v-expand-transition>
+        </v-card>
+        <AddGenreDialog v-model="showGenreDialog" :genre="selectedGenre" @submit="updateGenre" />
+        <DeleteConfirmationDialog v-model="isDeleteDialogOpen" message="Are you sure you want to delete this genre?"
+            @confirm="confirmDelete" />
+    </div>
+    <div v-else class="text-center my-5">
+        <v-card-title class="headline text-center">
+            No genres found
+        </v-card-title>
+        <p>Please add some genres to get started.</p>
+    </div>
+     <v-snackbar v-model="snackbar.value" rounded="pill">
+      {{ snackbar.text }}
+      <template v-slot:actions>
+        <v-btn :color="snackbar.color" variant="text" @click="closeSnackBar()">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
 </template>
-
