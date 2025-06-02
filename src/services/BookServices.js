@@ -22,4 +22,7 @@ export default {
   updateBook(bookId, book) {
     return apiClient.put("update/book/" + bookId, book);
   },
+  searchBooks(bookName) {
+    return apiClient.get("search/books?bookName=" + bookName);
+  },
 };
