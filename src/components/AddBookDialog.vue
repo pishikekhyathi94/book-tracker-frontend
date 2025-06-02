@@ -14,6 +14,8 @@ const localBook = ref({
   bookName: '',
   bookDescription: '',
   bookCoverImage: '',
+  onlineBuyingLink: "",
+  onlinePDFLink: "",
   authorId: '',
   genreId: ''
 });
@@ -28,10 +30,13 @@ function submitBook() {
     !localBook.value.bookDescription ||
     !localBook.value.bookCoverImage ||
     !localBook.value.authorId ||
-    !localBook.value.genreId
+    !localBook.value.genreId ||
+    !localBook.value.onlineBuyingLink ||
+    !localBook.value.onlinePDFLink
   ) return;
   emit('submit', { ...localBook.value });
-  localBook.value = { bookName: '', bookDescription: '', bookCoverImage: '', authorId: '', genreId: '' };
+  localBook.value = { bookName: '', bookDescription: '', onlineBuyingLink: "",
+    onlinePDFLink: "", bookCoverImage: '', authorId: '', genreId: '' };
   closeDialog();
 }
 </script>
@@ -56,6 +61,18 @@ function submitBook() {
         <v-text-field
           v-model="localBook.bookCoverImage"
           label="Book Cover Image URL"
+          outlined
+          required
+        />
+        <v-text-field
+          v-model="localBook.onlineBuyingLink"
+          label="Online Buying Link"
+          outlined
+          required
+        />
+        <v-text-field
+          v-model="localBook.onlinePDFLink"
+          label="Online PDF Link"
           outlined
           required
         />
