@@ -17,13 +17,13 @@ onMounted(() => {
 async function logout() {
   await UserServices.logoutUser()
     .then((data) => {
+      localStorage.removeItem("user");
+      user.value = null;
+      router.push({ name: "login" });
     })
     .catch((error) => {
       console.log(error);
     });
-    localStorage.removeItem("user");
-    user.value = null;
-    router.push({ name: "login" });
 }
 
 function gotoProfile() {

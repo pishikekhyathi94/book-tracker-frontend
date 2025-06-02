@@ -232,6 +232,8 @@ async function saveBookDetails(updatedBook) {
     bookDescription: updatedBook.bookDescription,
     bookAuthorId: updatedBook.bookAuthorId,
     bookGenreId: updatedBook.bookGenreId,
+    onlineBuyingLink: updatedBook.onlineBuyingLink,
+    onlinePDFLink: updatedBook.onlinePDFLink,
   })
     .then(async (response) => {
       if (response?.status === 200) {
