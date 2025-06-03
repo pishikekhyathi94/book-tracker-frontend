@@ -267,7 +267,7 @@ async function saveBookDetails(updatedBook) {
       <v-col cols="10">
         <v-tabs v-model="tab" align-tabs="left" color="secondary" class="mb-4 px-6">
           <v-tab :value="1">Books List</v-tab>
-          <v-tab :value="2">Whishlist</v-tab>
+          <v-tab :value="2">Wishlist</v-tab>
           <v-tab :value="4">Authors</v-tab>
           <v-tab :value="5">Genres</v-tab>
         </v-tabs>

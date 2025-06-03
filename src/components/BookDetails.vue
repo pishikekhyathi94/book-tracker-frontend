@@ -51,8 +51,8 @@ function closeDialog() {
             <p>{{ book?.bookDescription }}</p>
           </v-col>
           <v-col cols="12" md="12">
-            <v-btn color="primary" variant="flat" class="me-4">Start Reading</v-btn>
-            <v-btn color="secondary" variant="flat" >Buy Online</v-btn>
+            <!-- <v-btn color="primary" variant="flat" class="me-4">Start Reading</v-btn> -->
+            <!-- <v-btn color="secondary" variant="flat" >Buy Online</v-btn> -->
           </v-col>
         </v-row>
       </v-card-text>
