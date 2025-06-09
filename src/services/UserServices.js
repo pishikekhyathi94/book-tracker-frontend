@@ -23,4 +23,7 @@ export default {
   logoutUser() {
     return apiClient.get("logout");
   },
+   getNotifications(userId) {
+    return apiClient.get("notification?userId=" + userId);
+  }
 };

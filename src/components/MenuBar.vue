@@ -8,6 +8,7 @@ const router = useRouter();
 
 const user = ref(null);
 const logoURL = ref("");
+const messages = ref(null);
 
 onMounted(() => {
   logoURL.value = logo;
@@ -28,6 +29,16 @@ async function logout() {
 
 function gotoProfile() {
   router.push({ name: "profile" });
+}
+async function getNotifications() {
+  await UserServices.getNotifications(user.value.id)
+    .then((data) => {
+      messages.value = data.data;
+      user.value.notification_viewed = true;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 }
 
 </script>
@@ -54,6 +65,35 @@ function gotoProfile() {
         ></v-img>
       </router-link>
       <v-spacer></v-spacer>
+      <v-menu v-if="user !== null" class="me-2" min-width="200px"  rounded>
+        <template v-slot:activator="{ props }">
+          <v-btn icon v-bind="props" class="me-4" @click="getNotifications">
+            <v-badge
+              v-show="!user?.notification_viewed"
+              :value="messages?.length"
+              color="green"
+              overlap
+            >
+              <v-icon color="secondary" size="large">mdi-bell</v-icon>
+            </v-badge>
+            <v-icon
+              v-if="user?.notification_viewed"
+              color="secondary"
+              size="large"
+              >mdi-bell</v-icon
+            >
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-text>
+            <div class="mx-auto text-left">
+              <p v-for="message in messages" class="text-caption mt-1">
+                {{ message?.notification }}
+              </p>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-menu>
       <v-menu v-if="user !== null" min-width="200px" rounded>
         <template v-slot:activator="{ props }">
           <v-btn icon v-bind="props">
