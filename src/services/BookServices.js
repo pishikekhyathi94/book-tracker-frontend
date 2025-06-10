@@ -25,4 +25,7 @@ export default {
   searchBooks(bookName) {
     return apiClient.get("search/books?bookName=" + bookName);
   },
+  checkBookNameExists(bookName) {
+    return apiClient.get("title/book?title=" + bookName);
+  },
 };
