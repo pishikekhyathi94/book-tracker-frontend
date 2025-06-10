@@ -84,12 +84,12 @@ function closeSnackBar() {
       <v-progress-linear :active="isActive" color="deep-purple" height="4" indeterminate></v-progress-linear>
       </template>
 
-    <v-img height="200" :src="book?.bookCoverImage" class="book-cover-image"></v-img>
+    <v-img height="200" v-if="tab === 1 || tab === 2" :src="book?.bookCoverImage" class="book-cover-image"></v-img>
 
       <v-card-item>
       <v-card-title class="text-h5 font-weight-bold">{{ book?.bookName }}</v-card-title>
         <v-card-subtitle>
-        <span class="me-1 font-weight-medium">{{ book?.bookGenre?.bookGenre }}</span>
+        <span class="me-1 font-weight-medium">{{ book?.bookGenre?.bookGenre || book?.bookGenre }}</span>
         </v-card-subtitle>
       </v-card-item>
 
@@ -98,14 +98,14 @@ function closeSnackBar() {
           <!-- <v-rating :model-value="book?.rating" color="amber" density="compact" size="small" half-increments readonly></v-rating> -->
           <div class="text-subtitle-1">
             <v-icon color="error" size="small">mdi-book-account-outline</v-icon>
-            <span class="ms-1">{{ book?.bookAuthor?.authorName }}</span>
+            <span class="ms-1">{{ book?.bookAuthor?.authorName || book?.bookAuthor }}</span>
           </div>
         </v-row>
         <p class="text-justify overflow-y-auto" style="height: 100px">
         {{ book?.bookDescription || 'No description available.' }}
         </p>
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions v-if="tab === 1 || tab === 2">
         <v-col cols="6" class="pa-0">
         <v-btn color="primary" text="View Details" border @click="viewDetails" class="header-btn"></v-btn>
         </v-col>

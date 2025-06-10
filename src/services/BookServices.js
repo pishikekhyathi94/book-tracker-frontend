@@ -28,4 +28,7 @@ export default {
   checkBookNameExists(bookName) {
     return apiClient.get("title/book?title=" + bookName);
   },
+   getRecommendations(userId) {
+    return apiClient.get("books/recommendation?userId="+userId);
+  },
 };
