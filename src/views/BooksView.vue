@@ -69,6 +69,9 @@ watch(tab, async (newTab) => {
     await getGeners();
   } else if (newTab === 2) {
     await getWhislist();
+  } else if (newTab === 3) {
+    bookData.value = [];
+    await getRecommendations(user.value.id);
   }
 });
 
@@ -253,6 +256,27 @@ async function saveBookDetails(updatedBook) {
         "An error occurred while updating the book.";
     });
 }
+
+
+async function getRecommendations() {
+  loading.value = true;
+  await BookServices.getRecommendations(user.value.id)
+    .then((response) => {
+      if (response.status === 200) {
+        bookData.value = response.data;
+        loading.value = false;
+      }
+    })
+    .catch((error) => {
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text =
+        error?.response?.data?.message ||
+        "An error occurred while getting book recomandations.";
+      loading.value = false;
+    });
+}
+
 </script>
 
 <style>
@@ -268,6 +292,7 @@ async function saveBookDetails(updatedBook) {
         <v-tabs v-model="tab" align-tabs="left" color="secondary" class="mb-4 px-6">
           <v-tab :value="1">Books List</v-tab>
           <v-tab :value="2">Wishlist</v-tab>
+          <v-tab :value="3">Recommendations</v-tab>
           <v-tab :value="4">Authors</v-tab>
           <v-tab :value="5">Genres</v-tab>
         </v-tabs>
@@ -288,7 +313,7 @@ async function saveBookDetails(updatedBook) {
       </v-col>
     </v-row>
     <v-tabs-window v-model="tab">
-      <v-tabs-window-item v-for="n in 2" :key="n" :value="n">
+      <v-tabs-window-item v-for="n in 3" :key="n" :value="n">
         <v-text-field
           v-model="search"
           label="Search"
@@ -297,6 +322,7 @@ async function saveBookDetails(updatedBook) {
           hide-details
           single-line
           class="mb-4 px-6"
+          v-if="n === 1 || n === 2"
         ></v-text-field>
         <v-container fluid>
           <v-row v-if="bookData && bookData.length && tab === 1">
@@ -327,7 +353,30 @@ async function saveBookDetails(updatedBook) {
               @wishlistUpdated="getWhislist"
             />
           </v-row>
-          <v-row v-if="bookData && bookData.length === 0">
+            <v-row v-if="bookData && bookData.length && tab === 3">
+            <BookCard
+              v-for="book in bookData"
+              :id="book.id"
+              :key="book.id"
+              :book="book"
+              :user="user"
+              :tab="tab"
+              :loading="loading"
+              @edit="openEditModal"
+              @delete="openDeleteDialog"
+              @wishlistUpdated="getWhislist"
+            />
+          </v-row>
+          <v-row v-if="loading">
+            <v-col cols="12" class="text-center py-10">
+              <v-progress-circular
+                :size="50"
+                color="primary"
+                indeterminate
+              ></v-progress-circular>
+            </v-col>
+          </v-row>
+          <v-row v-if="bookData && bookData.length === 0 && !loading">
             <v-col cols="12" class="text-center py-10">
               <v-icon size="48" color="grey">mdi-book-off-outline</v-icon>
               <div class="text-h6 mt-2">No books found</div>
