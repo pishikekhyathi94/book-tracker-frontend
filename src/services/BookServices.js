@@ -31,4 +31,7 @@ export default {
    getRecommendations(userId) {
     return apiClient.get("books/recommendation?userId="+userId);
   },
+  startedReading(readingValues) {
+    return apiClient.put("book/reading?type=startreading", readingValues);
+  }
 };
