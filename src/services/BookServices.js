@@ -33,5 +33,11 @@ export default {
   },
   startedReading(readingValues) {
     return apiClient.put("book/reading?type=startreading", readingValues);
+  },
+    rateBook(ratingValues) {
+    return apiClient.post("rating", ratingValues);
+  },
+  rateUpdateBook(ratingValues) {
+    return apiClient.put("rating/", ratingValues);
   }
 };
