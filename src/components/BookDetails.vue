@@ -1,15 +1,23 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import BookServices from "@/services/BookServices";
+import { defineProps, defineEmits, ref } from "vue";
 
-defineProps({
+const props = defineProps({
   modelValue: Boolean,
   book: Object,
+  wishlistUpdated: Function,
+  user: { type: Object, required: true },
 });
+
 const snackbar = ref({
   value: false,
   color: "",
   text: "",
 });
+const finishReading = ref(false);
+const showRateBook = ref(false);
+const rating = ref(0);
+const comment = ref("");
 const showStartReadingInput = ref(false);
 const startPageNumber = ref("");
 const emit = defineEmits(["update:modelValue"]);
@@ -25,13 +33,11 @@ function handleStartReading() {
 }
 
 async function startedReading(pageNumber) {
-  if (book?.startedReading) {
-    return;
-  }
+  const book = props.book;
   try {
     const payload = {
       bookId: book.id,
-      userId: book.userId,
+      userId: props.user.id,
       currentPageNumber: pageNumber,
       isStartedReading: true,
       isReadingFinished: false,
@@ -39,11 +45,11 @@ async function startedReading(pageNumber) {
     await BookServices.startedReading(payload).then((response) => {
       if (response?.status === 200) {
         book.startedReading = true;
-        snackbar.value.value = true;
-        snackbar.value.color = "green";
-        snackbar.value.text = `You have started reading the book successfully!`;
       }
     });
+    if (props.wishlistUpdated) {
+      props.wishlistUpdated();
+    }
     emit("update:modelValue", false);
   } catch (error) {
     snackbar.value.value = true;
@@ -52,28 +58,19 @@ async function startedReading(pageNumber) {
       error?.response?.data?.message || "Error starting reading book.";
   }
 }
+
 async function finishReadingBook() {
-  if (!book?.startedReading) {
-    snackbar.value.value = true;
-    snackbar.value.color = "error";
-    snackbar.value.text = "You haven't started reading this book yet!";
-    return;
-  }
+  const book = props.book;
   try {
     const payload = {
       bookId: book.id,
-      userId: book.userId,
+      userId: props.user.id,
       isStartedReading: true,
       isReadingFinished: true,
     };
-    await BookServices.startedReading(payload).then((response) => {
+    await BookServices.finishedReading(payload).then((response) => {
       if (response?.status === 200) {
-        book.startedReading = false;
-        book.finishedReading = true;
         finishReading.value = true;
-        snackbar.value.value = true;
-        snackbar.value.color = "green";
-        snackbar.value.text = `You have finished reading the book successfully!`;
       }
     });
   } catch (error) {
@@ -82,6 +79,70 @@ async function finishReadingBook() {
     snackbar.value.text =
       error?.response?.data?.message || "Error finishing reading book.";
   }
+}
+
+async function submitRating(isUpdate = false) {
+  if (!rating.value || !comment.value) return;
+  const book = props.book;
+  if (isUpdate) {
+    try {
+      const payload = {
+        bookId: book.id,
+        userId: props.user.id,
+        rating: rating.value,
+        review: comment.value,
+      };
+      await BookServices.rateUpdateBook(payload).then((response) => {
+        if (response?.status === 200) {
+          showRateBook.value = false;
+          rating.value = 0;
+          comment.value = "";
+        }
+      });
+    } catch (error) {
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text =
+        error?.response?.data?.message || "Error rating book.";
+    }
+  } else {
+    try {
+      const payload = {
+        bookId: book.id,
+        userId: props.user.id,
+        rating: rating.value,
+        review: comment.value,
+      };
+      await BookServices.rateBook(payload).then((response) => {
+        if (response?.status === 200) {
+          showRateBook.value = false;
+          rating.value = 0;
+          comment.value = "";
+        }
+      });
+    } catch (error) {
+      snackbar.value.value = true;
+      snackbar.value.color = "error";
+      snackbar.value.text =
+        error?.response?.data?.message || "Error rating book.";
+    }
+  }
+}
+
+async function handleStartContinueReading() {
+  let url = props.book.onlinePDFLink;
+  if (url && !/^https?:\/\//i.test(url)) {
+    url = `http://${props.book.onlinePDFLink}`;
+  }
+  if (url) {
+    window.open(url, "_blank");
+  }
+}
+
+function openEditRating(r) {
+  showRateBook.value = true;
+  rating.value = r.rating;
+  comment.value = r.review;
 }
 </script>
 <style>
@@ -118,24 +179,128 @@ async function finishReadingBook() {
           <v-col cols="12" md="4">
             <strong>Genre:</strong> {{ book?.bookGenre?.bookGenre }}
           </v-col>
+          <v-col cols="12" md="4">
+            <strong>Release Date:</strong>
+            {{ new Date(book?.releaseDate).toLocaleDateString() }}
+          </v-col>
           <v-col cols="12" md="12">
             <strong>Description:</strong>
             <p>{{ book?.bookDescription }}</p>
           </v-col>
-          <div v-if="showStartReadingInput" class="mt-2">
-            <v-text-field
-              v-model="startPageNumber"
-              label="Enter page number"
-              type="number"
-              outlined
-              dense
+          <v-card
+            class="rounded-lg elevation-5 mb-5 mx-6"
+            v-for="rating in book?.bookRatings"
+          >
+            <v-card-title class="headline">
+              <v-row align="center">
+                <v-col cols="8" md="8">
+                  <v-rating
+                    v-model="rating.rating"
+                    color="amber"
+                    size="20"
+                    readonly
+                  ></v-rating>
+                </v-col>
+                <v-col cols="4" md="4" class="text-end">
+                  <v-icon
+                    size="small"
+                    icon="mdi-pencil"
+                    @click="openEditRating(rating)"
+                    class="mr-4"
+                  ></v-icon>
+                </v-col>
+              </v-row>
+              <v-row align="center">
+                <v-col cols="8" md="8">
+                  <span class="ms-2">{{ rating.review }}</span>
+                </v-col>
+              </v-row>
+            </v-card-title>
+          </v-card>
+          <div v-if="showRateBook" class="mb-4 w-100">
+            <v-rating
+              v-model="rating"
+              color="amber"
               class="mb-2"
+              half-increments="true"
+            ></v-rating>
+            <v-text-field
+              v-model="comment"
+              label="Your comment"
+              outlined
+              rows="2"
+              class="mb-2 w-100"
             ></v-text-field>
-            <v-btn color="success" @click="handleStartReading"> Submit </v-btn>
+          </div>
+          <div v-if="showStartReadingInput" class="mt-2 w-100">
+            <v-row>
+              <v-col cols="10" md="10">
+                <v-text-field
+                  v-model="startPageNumber"
+                  label="Enter page number"
+                  type="number"
+                  outlined
+                  dense
+                  class="mb-2"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="2" md="2">
+                <v-btn color="success" @click="handleStartReading">
+                  Submit
+                </v-btn>
+              </v-col>
+            </v-row>
           </div>
           <v-col cols="12" md="12">
-            <v-btn color="primary" variant="flat" @click="showStartReadingInput = true" class="me-4">Start Reading</v-btn>
-            <v-btn color="secondary" variant="flat" @click="finishReadingBook" :disabled="!book?.startedReading">Finish Reading</v-btn>
+            <v-btn
+              color="primary"
+              variant="flat"
+              class="me-4"
+              v-if="!book?.bookStatus?.isStartedReading"
+              :disabled="book?.bookStatus?.isStartedReading"
+              @click="showStartReadingInput = true"
+              >Start Reading</v-btn
+            >
+            <v-btn
+              color="primary"
+              variant="flat"
+              class="me-4"
+              v-if="
+                book?.bookStatus?.isStartedReading &&
+                !finishReading &&
+                !book?.bookStatus?.isReadingFinished
+              "
+              @click="handleStartContinueReading"
+              >Continue Reading</v-btn
+            >
+            <v-btn
+              color="secondary"
+              variant="flat"
+              v-if="!finishReading && !book?.bookStatus?.isReadingFinished"
+              :disabled="!book?.bookStatus?.isStartedReading"
+              @click="finishReadingBook"
+              >Finish Reading</v-btn
+            >
+            <v-btn
+              v-if="book?.bookStatus?.isReadingFinished || finishReading"
+              color="primary"
+              class="ms-4"
+              @click="showRateBook = true"
+            >
+              Rate Book
+            </v-btn>
+
+            <v-btn
+              v-if="
+                showRateBook &&
+                (book?.bookStatus?.isReadingFinished || finishReading)
+              "
+              color="success"
+              class="ml-2"
+              @click="submitRating"
+            >
+              Submit Rating
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
@@ -143,6 +308,7 @@ async function finishReadingBook() {
         <v-btn color="primary" @click="closeDialog">Close</v-btn>
       </v-card-actions>
     </v-card>
+
     <v-snackbar v-model="snackbar.value" rounded="pill">
       {{ snackbar.text }}
       <template v-slot:actions>
