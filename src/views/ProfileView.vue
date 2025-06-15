@@ -56,9 +56,6 @@ async function searchBooks() {
   }
 }
 
-function goBack() {
-  router.push({ name: "books" });
-}
 
 onMounted(() => {
   user.value = JSON.parse(localStorage.getItem("user"));
@@ -69,14 +66,6 @@ onMounted(() => {
 <template>
   <v-container>
     <v-row class="align-center">
-      <v-col cols="2">
-        <v-btn @click="goBack" variant="text" prepend-icon="mdi-check-circle">
-          <template v-slot:prepend>
-            <v-icon size="x-large">mdi-arrow-left</v-icon>
-          </template>
-          Book List
-        </v-btn>
-      </v-col>
       <v-col cols="10">
         <v-text-field
           v-model="searchQuery"
@@ -98,6 +87,7 @@ onMounted(() => {
         :key="book.id"
         :user="user"
         :tab="1"
+         @wishlistUpdated="fetchUserBooks"
       />
     </v-row>
     <v-row v-if="userBooks && userBooks.length === 0">

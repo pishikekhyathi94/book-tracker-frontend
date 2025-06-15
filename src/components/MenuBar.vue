@@ -27,9 +27,10 @@ async function logout() {
     });
 }
 
-function gotoProfile() {
-  router.push({ name: "profile" });
+function gotoBooksList() {
+  router.push({ name: "books" });
 }
+
 async function getNotifications() {
   await UserServices.getNotifications(user.value.id)
     .then((data) => {
@@ -117,7 +118,9 @@ async function getNotifications() {
                 {{ user?.email }}
               </p>
               <v-divider class="my-3"></v-divider>
-              <v-btn rounded variant="text" @click="gotoProfile()">Profile</v-btn>
+              <v-btn rounded variant="text" @click="gotoBooksList()"
+                >BooksList</v-btn
+              >
               <v-btn rounded variant="text" @click="logout()"> Logout </v-btn>
             </div>
           </v-card-text>
