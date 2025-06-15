@@ -276,7 +276,9 @@ async function getRecommendations() {
       loading.value = false;
     });
 }
-
+function goBack() {
+  router.push({ name: "profile" });
+}
 </script>
 
 <style>
@@ -288,7 +290,15 @@ async function getRecommendations() {
 <template>
   <v-card class="w-100 h-100">
     <v-row>
-      <v-col cols="10">
+       <v-col cols="2">
+        <v-btn @click="goBack" variant="text" prepend-icon="mdi-check-circle">
+          <template v-slot:prepend>
+            <v-icon size="x-large">mdi-arrow-left</v-icon>
+          </template>
+          Profile
+        </v-btn>
+      </v-col>
+      <v-col cols="8">
         <v-tabs v-model="tab" align-tabs="left" color="secondary" class="mb-4 px-6">
           <v-tab :value="1">Books List</v-tab>
           <v-tab :value="2">Wishlist</v-tab>
