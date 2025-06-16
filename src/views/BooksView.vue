@@ -11,7 +11,9 @@ import GenreServices from "../services/GenreServices.js";
 import BookCard from "../components/BookCard.vue";
 import AddBookDialog from "../components/AddBookDialog.vue";
 import BookServices from "../services/BookServices.js";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const tab = ref(null);
 const loading = ref(false);
 const search = ref("");
