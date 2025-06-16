@@ -1,5 +1,5 @@
 <script setup>
-import BookServices from "@/services/BookServices";
+import BookServices from "../services/BookServices.js";
 import { defineProps, defineEmits, ref } from "vue";
 
 const props = defineProps({
@@ -20,6 +20,7 @@ const rating = ref(0);
 const comment = ref("");
 const showStartReadingInput = ref(false);
 const startPageNumber = ref("");
+const editRating = ref(null);
 const emit = defineEmits(["update:modelValue"]);
 
 function closeDialog() {
@@ -84,7 +85,8 @@ async function finishReadingBook() {
 async function submitRating(isUpdate = false) {
   if (!rating.value || !comment.value) return;
   const book = props.book;
-  if (isUpdate) {
+
+  if (isUpdate === true && editRating.value) {
     try {
       const payload = {
         bookId: book.id,
@@ -92,13 +94,20 @@ async function submitRating(isUpdate = false) {
         rating: rating.value,
         review: comment.value,
       };
-      await BookServices.rateUpdateBook(payload).then((response) => {
-        if (response?.status === 200) {
-          showRateBook.value = false;
-          rating.value = 0;
-          comment.value = "";
+      await BookServices.rateUpdateBook(payload, editRating.value.id).then(
+        (response) => {
+          if (response?.status === 200) {
+            showRateBook.value = false;
+            rating.value = 0;
+            comment.value = "";
+            emit("update:modelValue", false);
+            editRating.value = null;
+            if (props.wishlistUpdated) {
+              props.wishlistUpdated();
+            }
+          }
         }
-      });
+      );
     } catch (error) {
       snackbar.value.value = true;
       snackbar.value.color = "error";
@@ -118,6 +127,10 @@ async function submitRating(isUpdate = false) {
           showRateBook.value = false;
           rating.value = 0;
           comment.value = "";
+          emit("update:modelValue", false);
+          if (props.wishlistUpdated) {
+            props.wishlistUpdated();
+          }
         }
       });
     } catch (error) {
@@ -141,6 +154,7 @@ async function handleStartContinueReading() {
 
 function openEditRating(r) {
   showRateBook.value = true;
+  editRating.value = r;
   rating.value = r.rating;
   comment.value = r.review;
 }
@@ -169,7 +183,6 @@ function openEditRating(r) {
         <v-divider class="my-3"></v-divider>
 
         <v-row>
-          {{ console.log(book, "26::") }}
           <v-col cols="12" md="4">
             <strong>Title:</strong> {{ book?.bookName }}
           </v-col>
@@ -222,7 +235,7 @@ function openEditRating(r) {
               v-model="rating"
               color="amber"
               class="mb-2"
-              half-increments="true"
+              :half-increments="true"
             ></v-rating>
             <v-text-field
               v-model="comment"
@@ -281,17 +294,27 @@ function openEditRating(r) {
               @click="finishReadingBook"
               >Finish Reading</v-btn
             >
+            <v-icon
+              v-if="book?.bookStatus?.isReadingFinished || finishReading"
+              icon="mdi-check-circle-outline"
+              color="green"
+              size="38"
+            >
+            </v-icon>
+            <span v-if="book?.bookStatus?.isReadingFinished || finishReading"
+              >Finished Reading</span
+            >
             <v-btn
               v-if="book?.bookStatus?.isReadingFinished || finishReading"
               color="primary"
               class="ms-4"
-              @click="showRateBook = true"
+              @click="editRating ? submitRating(true) : (showRateBook = true)"
             >
-              Rate Book
+              {{ editRating ? "Edit Rating" : "Rate Book" }}
             </v-btn>
-
             <v-btn
               v-if="
+                !editRating &&
                 showRateBook &&
                 (book?.bookStatus?.isReadingFinished || finishReading)
               "

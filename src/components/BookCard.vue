@@ -66,6 +66,11 @@ async function removeWhishlistBook() {
     snackbar.value.text = error?.response?.data?.message || "Error removing book from wishlist.";
   }
 }
+
+function handleWishlistUpdated() {
+   emit("wishlistUpdated");
+}
+
 function closeSnackBar() {
   snackbar.value.value = false;
 }
