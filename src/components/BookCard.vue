@@ -45,8 +45,8 @@ async function whishlistBook() {
     });
   } catch (error) {
     snackbar.value.value = true;
-      snackbar.value.color = "error";
-      snackbar.value.text = error?.response?.data?.message || "Error adding book to wishlist.";
+    snackbar.value.color = "error";
+    snackbar.value.text = error?.response?.data?.message || "Error adding book to wishlist.";
   }
 }
 async function removeWhishlistBook() {
@@ -72,24 +72,24 @@ function closeSnackBar() {
 </script>
 
 <style>
-.book-cover-image .v-img__img{
+.book-cover-image .v-img__img {
   object-fit: fill !important;
 }
 </style>
 
 <template>
   <v-col cols="12" sm="6" md="4" lg="4">
-  <v-card :disabled="loading" :loading="loading" class="mx-auto mb-6" max-width="374" hover>
+    <v-card :disabled="loading" :loading="loading" class="mx-auto mb-6" max-width="374" hover>
       <template v-slot:loader="{ isActive }">
-      <v-progress-linear :active="isActive" color="deep-purple" height="4" indeterminate></v-progress-linear>
+        <v-progress-linear :active="isActive" color="deep-purple" height="4" indeterminate></v-progress-linear>
       </template>
 
-    <v-img height="200" v-if="tab === 1 || tab === 2" :src="book?.bookCoverImage" class="book-cover-image"></v-img>
+      <v-img height="200" v-if="tab === 1 || tab === 2" :src="book?.bookCoverImage" class="book-cover-image"></v-img>
 
       <v-card-item>
-      <v-card-title class="text-h5 font-weight-bold">{{ book?.bookName }}</v-card-title>
+        <v-card-title class="text-h5 font-weight-bold">{{ book?.bookName }}</v-card-title>
         <v-card-subtitle>
-        <span class="me-1 font-weight-medium">{{ book?.bookGenre?.bookGenre || book?.bookGenre }}</span>
+          <span class="me-1 font-weight-medium">{{ book?.bookGenre?.bookGenre || book?.bookGenre }}</span>
         </v-card-subtitle>
       </v-card-item>
 
@@ -102,53 +102,34 @@ function closeSnackBar() {
           </div>
         </v-row>
         <p class="text-justify overflow-y-auto" style="height: 100px">
-        {{ book?.bookDescription || 'No description available.' }}
+          {{ book?.bookDescription || 'No description available.' }}
         </p>
       </v-card-text>
       <v-card-actions v-if="tab === 1 || tab === 2">
         <v-col cols="6" class="pa-0">
-        <v-btn color="primary" text="View Details" border @click="viewDetails" class="header-btn"></v-btn>
+          <v-btn color="primary" text="View Details" border @click="viewDetails" class="header-btn"></v-btn>
         </v-col>
         <v-col cols="6" class="d-flex pa-0 justify-end">
-          <v-btn
-            color="red"
-            v-if="tab === 1  && props.user.id === book.userId"
-            icon="mdi-pencil-box-outline"
-            size="large"
-            @click="openEdit"
-          ></v-btn>
-          <v-btn
-            v-if="tab === 2 || (tab === 1 && book.isWishlisted)"
-            color="red"
-            icon="mdi-heart"
-            size="large"
-            @click="removeWhishlistBook"
-          ></v-btn>
-          <v-btn
-            v-if="tab === 1 && !book.isWishlisted"
-            color="red"
-            icon="mdi-heart-outline"
-            size="large"
-            @click="whishlistBook"
-          ></v-btn>
-          <v-btn
-            v-if="tab === 1  && props.user.id === book.userId"
-            color="red"
-            icon="mdi-delete"
-            @click="openDelete"
-            size="large"
-          ></v-btn>
+          <v-btn color="red" v-if="tab === 1 && props.user.id === book.userId" icon="mdi-pencil-box-outline"
+            size="large" @click="openEdit"></v-btn>
+          <v-btn v-if="tab === 2 || (tab === 1 && book.isWishlisted)" color="red" icon="mdi-heart" size="large"
+            @click="removeWhishlistBook"></v-btn>
+          <v-btn v-if="tab === 1 && !book.isWishlisted" color="red" icon="mdi-heart-outline" size="large"
+            @click="whishlistBook"></v-btn>
+          <v-btn v-if="tab === 1 && props.user.id === book.userId" color="red" icon="mdi-delete" @click="openDelete"
+            size="large"></v-btn>
         </v-col>
       </v-card-actions>
     </v-card>
   </v-col>
-   <BookDetails v-model="isBookDetailsDialogOpen" :book="selectedBook" />
+  <BookDetails v-model="isBookDetailsDialogOpen" :book="selectedBook" :user="props.user"
+    :wishlistUpdated="handleWishlistUpdated" />
   <v-snackbar v-model="snackbar.value" rounded="pill">
-      {{ snackbar.text }}
-      <template v-slot:actions>
-        <v-btn :color="snackbar.color" variant="text" @click="closeSnackBar()">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
+    {{ snackbar.text }}
+    <template v-slot:actions>
+      <v-btn :color="snackbar.color" variant="text" @click="closeSnackBar()">
+        Close
+      </v-btn>
+    </template>
+  </v-snackbar>
 </template>

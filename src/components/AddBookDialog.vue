@@ -18,6 +18,7 @@ const localBook = ref({
   onlineBuyingLink: "",
   onlinePDFLink: "",
   authorId: '',
+  releaseDate: '',
   genreId: ''
 });
 
@@ -33,11 +34,12 @@ function submitBook() {
     !localBook.value.authorId ||
     !localBook.value.genreId ||
     !localBook.value.onlineBuyingLink ||
-    !localBook.value.onlinePDFLink
+    !localBook.value.onlinePDFLink ||
+      !localBook.value.releaseDate
   ) return;
   emit('submit', { ...localBook.value });
   localBook.value = { bookName: '', bookDescription: '', onlineBuyingLink: "",
-    onlinePDFLink: "", bookCoverImage: '', authorId: '', genreId: '' };
+    onlinePDFLink: "", bookCoverImage: '', authorId: '', genreId: '', releaseDate: "" };
      isBookNameExists.value = false;
   closeDialog();
 }
@@ -49,7 +51,6 @@ async function checkBookNameExists() {
     const exists = await BookServices.checkBookNameExists(
       localBook.value.bookName
     );
-    console.log(exists, "69::");
     if (exists.status !== 200) {
       isBookNameExists.value = true;
       snackbar.value.value = true;
@@ -89,6 +90,12 @@ async function checkBookNameExists() {
         <v-text-field
           v-model="localBook.bookCoverImage"
           label="Book Cover Image URL"
+          outlined
+          required
+        />
+         <v-text-field
+          v-model="localBook.releaseDate"
+          label="Release Date"
           outlined
           required
         />
