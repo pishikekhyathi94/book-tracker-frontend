@@ -1,8 +1,8 @@
 import apiClient from "./services";
 
 export default {
-  getBooks() {
-    return apiClient.get("all/books");
+  getBooks(userId) {
+    return apiClient.get("all/books?userId=" + userId+ "&type=all");
   },
   addBook(book) {
     return apiClient.post("create/book", book);
@@ -16,7 +16,7 @@ export default {
    getWhislist(userId) {
     return apiClient.get("wishlist?userId="+userId);
   },
-   deletebook(bookId) {
+  deletebook(bookId) {
     return apiClient.delete("delete/book/" + bookId);
   },
   updateBook(bookId, book) {
@@ -34,10 +34,13 @@ export default {
   startedReading(readingValues) {
     return apiClient.put("book/reading?type=startreading", readingValues);
   },
-    rateBook(ratingValues) {
+  finishedReading(readingValues) {
+    return apiClient.put("book/reading", readingValues);
+  },
+  rateBook(ratingValues) {
     return apiClient.post("rating", ratingValues);
   },
-  rateUpdateBook(ratingValues) {
-    return apiClient.put("rating/", ratingValues);
+  rateUpdateBook(ratingValues, rating) {
+    return apiClient.put("rating/" + rating, ratingValues);
   }
 };

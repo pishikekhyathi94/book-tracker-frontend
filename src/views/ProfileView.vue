@@ -3,7 +3,6 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import BookServices from "../services/BookServices";
 import BookCard from "../components/BookCard.vue";
-import ProfileServices from "../services/ProfileServices.js";
 
 const router = useRouter();
 const user = ref(null);
@@ -20,14 +19,14 @@ watch(searchQuery, async (val) => {
   if (val && val.length >= 3) {
     await searchBooks(val);
   } else {
-    await fetchUserBooks();
+    await fetchAllBooks();
   }
 });
 
-async function fetchUserBooks() {
+async function fetchAllBooks() {
   try {
     loading.value = true;
-    const response = await ProfileServices.getMyBooks(user.value.id);
+    const response = await BookServices.getBooks(user.value.id);
     userBooks.value = response.data;
   } catch (error) {
     snackbar.value = {
@@ -59,13 +58,25 @@ async function searchBooks() {
 
 onMounted(() => {
   user.value = JSON.parse(localStorage.getItem("user"));
-  fetchUserBooks();
+  fetchAllBooks();
 });
+
+function goBack() {
+  router.push({ name: "books" });
+}
 </script>
 
 <template>
   <v-container>
     <v-row class="align-center">
+       <v-col cols="2">
+        <v-btn @click="goBack" variant="text" prepend-icon="mdi-check-circle">
+          <template v-slot:prepend>
+            <v-icon size="x-large">mdi-arrow-left</v-icon>
+          </template>
+           Profile Books List
+        </v-btn>
+      </v-col>
       <v-col cols="10">
         <v-text-field
           v-model="searchQuery"
@@ -87,7 +98,7 @@ onMounted(() => {
         :key="book.id"
         :user="user"
         :tab="1"
-         @wishlistUpdated="fetchUserBooks"
+         @wishlistUpdated="fetchAllBooks"
       />
     </v-row>
     <v-row v-if="userBooks && userBooks.length === 0">

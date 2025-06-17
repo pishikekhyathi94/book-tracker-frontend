@@ -28,7 +28,7 @@ async function logout() {
 }
 
 function gotoBooksList() {
-  router.push({ name: "books" });
+  router.push({ name: "profile" });
 }
 
 async function getNotifications() {
