@@ -18,7 +18,6 @@ const finishReading = ref(false);
 const showRateBook = ref(false);
 const rating = ref(0);
 const comment = ref("");
-const showStartReadingInput = ref(false);
 const startPageNumber = ref("");
 const editRating = ref(null);
 const emit = defineEmits(["update:modelValue"]);
@@ -26,10 +25,16 @@ const emit = defineEmits(["update:modelValue"]);
 function closeDialog() {
   emit("update:modelValue", false);
 }
+
 function handleStartReading() {
+  startedReading(startPageNumber.value || 1);
+  startPageNumber.value = "";
+  handleStartContinueReading();
+}
+
+async function updatePageNumber() {
   if (!startPageNumber.value) return;
   startedReading(startPageNumber.value);
-  showStartReadingInput.value = false;
   startPageNumber.value = "";
 }
 
@@ -196,6 +201,18 @@ function openEditRating(r) {
             <strong>Release Date:</strong>
             {{ new Date(book?.releaseDate).toLocaleDateString() }}
           </v-col>
+          <v-col cols="12" md="4">
+            <strong>Buy Online:</strong>
+            <a
+              v-if="book?.onlineBuyingLink"
+              :href="book.onlineBuyingLink"
+              target="_blank"
+              rel="noopener"
+              style="color: #1976d2; text-decoration: underline"
+            >
+              {{ book.onlineBuyingLink }}
+            </a>
+          </v-col>
           <v-col cols="12" md="12">
             <strong>Description:</strong>
             <p>{{ book?.bookDescription }}</p>
@@ -245,20 +262,27 @@ function openEditRating(r) {
               class="mb-2 w-100"
             ></v-text-field>
           </div>
-          <div v-if="showStartReadingInput" class="mt-2 w-100">
+          <div class="mt-2 w-100">
             <v-row>
               <v-col cols="10" md="10">
                 <v-text-field
                   v-model="startPageNumber"
                   label="Enter page number"
+                  :disabled="!book?.bookStatus?.isStartedReading"
                   type="number"
+                  v-if="!book?.bookStatus?.isReadingFinished && !finishReading" 
                   outlined
                   dense
                   class="mb-2"
                 ></v-text-field>
               </v-col>
               <v-col cols="2" md="2">
-                <v-btn color="success" @click="handleStartReading">
+                <v-btn
+                  color="success"
+                  v-if="!book?.bookStatus?.isReadingFinished && !finishReading" 
+                  :disabled="!book?.bookStatus?.isStartedReading"
+                  @click="updatePageNumber"
+                >
                   Submit
                 </v-btn>
               </v-col>
@@ -271,7 +295,7 @@ function openEditRating(r) {
               class="me-4"
               v-if="!book?.bookStatus?.isStartedReading"
               :disabled="book?.bookStatus?.isStartedReading"
-              @click="showStartReadingInput = true"
+              @click="handleStartReading"
               >Start Reading</v-btn
             >
             <v-btn
@@ -284,7 +308,9 @@ function openEditRating(r) {
                 !book?.bookStatus?.isReadingFinished
               "
               @click="handleStartContinueReading"
-              >Continue Reading</v-btn
+              >{{
+                `Continue Reading from Page ${book?.bookStatus?.currentPageNumber}`
+              }}</v-btn
             >
             <v-btn
               color="secondary"

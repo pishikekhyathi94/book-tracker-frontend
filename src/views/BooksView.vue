@@ -11,6 +11,7 @@ import GenreServices from "../services/GenreServices.js";
 import BookCard from "../components/BookCard.vue";
 import AddBookDialog from "../components/AddBookDialog.vue";
 import BookServices from "../services/BookServices.js";
+import ProfileServices from "../services/ProfileServices.js";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -156,7 +157,7 @@ function closeSnackBar() {
 async function fetchBooks() {
   loading.value = true;
   try {
-    const response = await BookServices.getBooks();
+    const response = await ProfileServices.getMyBooks(user.value.id);
     bookData.value = response.data;
   } catch (error) {
     console.error("Error fetching books:", error);
@@ -278,9 +279,7 @@ async function getRecommendations() {
       loading.value = false;
     });
 }
-function goBack() {
-  router.push({ name: "profile" });
-}
+
 </script>
 
 <style>
@@ -292,17 +291,9 @@ function goBack() {
 <template>
   <v-card class="w-100 h-100">
     <v-row>
-       <v-col cols="2">
-        <v-btn @click="goBack" variant="text" prepend-icon="mdi-check-circle">
-          <template v-slot:prepend>
-            <v-icon size="x-large">mdi-arrow-left</v-icon>
-          </template>
-          Profile
-        </v-btn>
-      </v-col>
       <v-col cols="8">
         <v-tabs v-model="tab" align-tabs="left" color="secondary" class="mb-4 px-6">
-          <v-tab :value="1">Books List</v-tab>
+          <v-tab :value="1">Profile Books List</v-tab>
           <v-tab :value="2">Wishlist</v-tab>
           <v-tab :value="3">Recommendations</v-tab>
           <v-tab :value="4">Authors</v-tab>
